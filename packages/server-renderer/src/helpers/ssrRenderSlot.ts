@@ -15,13 +15,13 @@ export function ssrRenderSlot(
   slotProps: Props,
   fallbackRenderFn: (() => void) | null,
   push: PushFn,
-  parentComponent: ComponentInternalInstance
+  parentComponent: ComponentInternalInstance,
+  slotScopeId?: string
 ) {
   // template-compiled slots are always rendered as fragments
   push(`<!--[-->`)
   const slotFn = slots[slotName]
   if (slotFn) {
-    const scopeId = parentComponent && parentComponent.type.__scopeId
     const slotBuffer: SSRBufferItem[] = []
     const bufferedPush = (item: SSRBufferItem) => {
       slotBuffer.push(item)
@@ -30,11 +30,11 @@ export function ssrRenderSlot(
       slotProps,
       bufferedPush,
       parentComponent,
-      scopeId ? ` ${scopeId}-s` : ``
+      slotScopeId ? ' ' + slotScopeId : ''
     )
     if (Array.isArray(ret)) {
       // normal slot
-      renderVNodeChildren(push, ret, parentComponent)
+      renderVNodeChildren(push, ret, parentComponent, slotScopeId)
     } else {
       // ssr slot.
       // check if the slot renders all comments, in which case use the fallback
